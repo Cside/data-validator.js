@@ -1,0 +1,3 @@
+[submodule "modules/qunit-tap"]
+	path = modules/qunit-tap
+	url = https://Cside@github.com/Cside/qunit-tap.git
