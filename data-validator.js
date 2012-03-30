@@ -36,7 +36,7 @@ var DataValidator = {
                 throw 'Type not found: ' + rule.isa;
             if (!rule.optional && typeof args[name] === 'undefined')
                 throw 'Argument ' + name + ' is required'
-            if (!validator(args[name]))
+            if (!rule.optional && !validator(args[name]))
                 throw 'Validation failed for ' + rule.isa;
         });
         return args;
