@@ -27,15 +27,25 @@ var DataValidator = {
         var usage = this._getUsage(rules);
         var self  = this;
         if (!args) throw sprintf('Arguments must be a object\n%s', usage);
-        rules.each(function(name, rule) {
+        rules.each(function(ruleName, rule) {
             if (self.typeMap.isString(rule)) rule = { isa: rule };
-            if (rule.alias) args[rule.alias] = args[name];
+            var ret     = args[ruleName];
+            var aliases = rule.alias;
+            if (self.typeMap.isArray(aliases)) {
+                if (!ret) ret = args[aliases.filter(function (alias) { return !!args[alias] })[0]];
+                if (!args[ruleName]) args[ruleName] = ret;
+                aliases.forEach(function (alias) { args[alias] = ret });
+            } else {
+                if (!ret) ret = args[aliases];
+                if (!args[ruleName]) args[ruleName] = ret;
+                args[aliases] = ret;
+            }
             var validator = TYPE_MAP['is' + rule.isa];
             if (!validator)
                 throw sprintf('Type not found: %s', rule.isa);
-            if (!rule.optional && typeof args[name] === 'undefined')
-                throw sprintf('Argument %s is required\n%s', name, usage)
-            if (!rule.optional && !validator(args[name]))
+            if (!rule.optional && typeof ret === 'undefined')
+                throw sprintf('Argument %s is required\n%s', ruleName, usage)
+            if (!rule.optional && !validator(ret))
                 throw sprintf('Validation failed for %s\n%s', rule.isa, usage);
         });
         return args;
@@ -44,11 +54,11 @@ var DataValidator = {
         return 'Usage: \n' + this._indent(
             sprintf(
                 'function(\n%s\n);',
-                rules.each(function (name, rule) {
+                rules.each(function (ruleName, rule) {
                     if (typeof rule === 'string') rule = { isa: rule };
                     return sprintf(
                         '\t%s : %s%s,',
-                        name, rule.isa,
+                        ruleName, rule.isa,
                         rule.optional ? ' (optional)' : ''
                     );
                 }).join('\n')

@@ -92,16 +92,48 @@ subtest('undefined type', function () {
 });
 
 subtest('alias', function () {
-    var testFunc = function () {
-        var args = DataValidator.validate({
-            limit: {isa: 'Int', alias: 'maxResults'}
-        }, arguments);
-        return args;
-    };
-    var ret = testFunc({limit: 10});
-    ok(ret);
-    is(ret.limit,      10);
-    is(ret.maxResults, 10);
+    (function () {
+        var testFunc = function () {
+            var args = DataValidator.validate({
+                limit: {isa: 'Int', alias: 'maxResults'}
+            }, arguments);
+            return args;
+        };
+        (function () {
+            var ret = testFunc({limit: 10});
+            ok(ret);
+            is(ret.limit,      10);
+            is(ret.maxResults, 10);
+        })();
+        (function () {
+            var ret = testFunc({maxResults: 10});
+            ok(ret);
+            is(ret.limit,      10);
+            is(ret.maxResults, 10);
+        })();
+    })();
+    (function () {
+        var testFunc = function () {
+            var args = DataValidator.validate({
+                limit: {isa: 'Int', alias: ['maxResults', 'max_results']}
+            }, arguments);
+            return args;
+        };
+        (function() {
+            var ret = testFunc({maxResults: 10});
+            ok(ret);
+            is(ret.limit,       10);
+            is(ret.maxResults,  10);
+            is(ret.max_results, 10);
+        })();
+        (function() {
+            var ret = testFunc({limit: 10});
+            ok(ret);
+            is(ret.limit,       10);
+            is(ret.maxResults,  10);
+            is(ret.max_results, 10);
+        })();
+    })();
 });
 
 // XXX
