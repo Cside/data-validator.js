@@ -40,27 +40,28 @@ var DataValidator = {
         var args  = arguments[0];
         var usage = this._getUsage(rules);
         var self  = this;
-        if (!args) throw sprintf('Arguments must be a object\n%s', usage);
+        var defined = function (stuff) { typeof stuff !== 'undefined' }
+        if (!args) throw new Error(sprintf('Arguments must be a object\n%s', usage));
         rules.each(function(ruleName, rule) {
             if (self.typeMap.isString(rule)) rule = { isa: rule };
-            var ret     = args[ruleName];
+            var ret     = defined(args[ruleName]) ? args[ruleName] : rule.default;
             var aliases = rule.alias;
             if (self.typeMap.isArray(aliases)) {
-                if (!ret) ret = args[aliases.filter(function (alias) { return !!args[alias] })[0]];
-                if (!args[ruleName]) args[ruleName] = ret;
+                if (!defined(ret)) ret = args[aliases.filter(function (alias) { return !!args[alias] })[0]];
+                if (!defined(args[ruleName])) args[ruleName] = ret;
                 aliases.forEach(function (alias) { args[alias] = ret });
             } else {
-                if (!ret) ret = args[aliases];
-                if (!args[ruleName]) args[ruleName] = ret;
+                if (!defined(ret)) ret = args[aliases];
+                if (!defined(args[ruleName])) args[ruleName] = ret;
                 args[aliases] = ret;
             }
             var validator = TYPE_MAP['is' + rule.isa];
             if (!validator)
-                throw sprintf('Type not found: %s', rule.isa);
-            if (!rule.optional && typeof ret === 'undefined')
-                throw sprintf('Argument %s is required\n%s', ruleName, usage)
-            if (!rule.optional && !validator(ret))
-                throw sprintf('Validation failed for %s\n%s', rule.isa, usage);
+                throw new Error(sprintf('Type not found: %s', rule.isa));
+            if (!(rule.optional || defined(ret)))
+                throw new Error(sprintf('Argument %s is required\n%s', ruleName, usage))
+            if (!(rule.optional || validator(ret) || rule.default))
+                throw new Error(sprintf('Validation failed for %s\n%s', rule.isa, usage));
         });
         return args;
     },

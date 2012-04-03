@@ -136,6 +136,78 @@ subtest('alias', function () {
     })();
 });
 
+subtest('none', function () {
+    var testFunc = function () {
+        var args = DataValidator.validate({
+            limit: {isa: 'Int', optional: 25},
+        }, arguments);
+        return args;
+    };
+    var error;
+    try {
+        testFunc({});
+    } catch (e) {
+        error = e;
+    }
+    ok(!error);
+});
+
+subtest('default', function () {
+    (function() {
+        var testFunc = function () {
+            var args = DataValidator.validate({
+                limit: {isa: 'Int', default: 25},
+            }, arguments);
+            return args;
+        };
+        var ret = testFunc({});
+        ok(ret);
+        is(ret.limit, 25);
+    })();
+    (function() {
+        var testFunc = function () {
+            var args = DataValidator.validate({
+                limit: {isa: 'Int', default: 25, alias: ['max_results', 'maxResults']},
+            }, arguments);
+            return args;
+        };
+        (function () {
+            var ret = testFunc({});
+            ok(ret);
+            is(ret.limit,       25);
+            is(ret.maxResults,  25);
+            is(ret.max_results, 25);
+        })();
+        (function () {
+            var ret = testFunc({max_results: undefined});
+            ok(ret);
+            is(ret.limit,       25);
+            is(ret.maxResults,  25);
+            is(ret.max_results, 25);
+        })();
+        (function () {
+            var ret = testFunc({max_results: 0});
+            ok(ret);
+            is(ret.limit,       0);
+            is(ret.maxResults,  0);
+            is(ret.max_results, 0);
+        })();
+    })();
+    (function() {
+        var testFunc = function () {
+            var args = DataValidator.validate({
+                limit: {isa: 'Int', default: undefined, alias: ['max_results', 'maxResults']},
+            }, arguments);
+            return args;
+        };
+        var ret = testFunc({});
+        ok(ret);
+        is(ret.limit,       undefined);
+        is(ret.maxResults,  undefined);
+        is(ret.max_results, undefined);
+    })();
+});
+
 // XXX
 // - enum
 // - Array[Object]
