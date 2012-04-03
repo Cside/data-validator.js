@@ -9,7 +9,7 @@ subtest('validate args', function () {
     var testFunc = function TEST () {
         var args = DataValidator.validate({
             artist: 'Str',
-            limit:  { isa: 'Number', optional: 1 }
+            limit:  { isa: 'Number', optional: true }
         }, arguments);
         return args;
     };
@@ -54,7 +54,7 @@ subtest('undefined type', function () {
     var testFunc = function () {
         var args = DataValidator.validate({
             artist: 'Str',
-            limit:  { isa: 'UndefinedType', optional: 1 }
+            limit:  { isa: 'UndefinedType', optional: true }
         }, arguments);
         return args;
     };
@@ -112,7 +112,8 @@ subtest('alias', function () {
 subtest('none', function () {
     var testFunc = function () {
         var args = DataValidator.validate({
-            limit: {isa: 'Int', optional: 25},
+            artist: {isa: 'Str', optional: true},
+            limit : {isa: 'Int', optional: true},
         }, arguments);
         return args;
     };
@@ -123,6 +124,19 @@ subtest('none', function () {
         error = e;
     }
     ok(!error);
+    (function() {
+        var testFunc = function () {
+            var args = DataValidator.validate({
+                limit: {isa: 'Undefined', alias: ['max_results', 'maxResults']},
+            }, arguments);
+            return args;
+        };
+        var ret = testFunc({maxResults: undefined});
+        ok(ret);
+        is(ret.limit,       undefined);
+        is(ret.maxResults,  undefined);
+        is(ret.max_results, undefined);
+    })();
 });
 
 subtest('default', function () {
@@ -165,19 +179,6 @@ subtest('default', function () {
             is(ret.maxResults,  0);
             is(ret.max_results, 0);
         })();
-    })();
-    (function() {
-        var testFunc = function () {
-            var args = DataValidator.validate({
-                limit: {isa: 'Int', default: undefined, alias: ['max_results', 'maxResults']},
-            }, arguments);
-            return args;
-        };
-        var ret = testFunc({});
-        ok(ret);
-        is(ret.limit,       undefined);
-        is(ret.maxResults,  undefined);
-        is(ret.max_results, undefined);
     })();
 });
 
