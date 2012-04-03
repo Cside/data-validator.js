@@ -182,10 +182,4 @@ subtest('default', function () {
     })();
 });
 
-// XXX
-// - enum
-// - Array[Object]
-// - ClassName
-// - where -> function () {...}
-
 }).call(this);

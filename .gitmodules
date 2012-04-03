@@ -4,3 +4,6 @@
 [submodule "modules/underscore"]
 	path = modules/underscore
 	url = https://github.com/documentcloud/underscore
+[submodule "modules/qunit"]
+	path = modules/qunit
+	url = https://github.com/Cside/qunit
