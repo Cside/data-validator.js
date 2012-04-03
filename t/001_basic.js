@@ -1,9 +1,9 @@
 (function () {
 "use strict";
 
-var Helper = require('./test/node-test');
+var Helper        = require('./test/node-test');
+var DataValidator = require('../data-validator')
 Helper.define();
-var DataValidator = require('../data-validator');
 
 subtest('type map', function () {
     var v = DataValidator.typeMap;
@@ -33,7 +33,7 @@ subtest('type map', function () {
 });
 
 subtest('validate args', function () {
-    var testFunc = function () {
+    var testFunc = function TEST () {
         var args = DataValidator.validate({
             artist: 'Str',
             limit:  { isa: 'Number', optional: 1 }
@@ -47,26 +47,34 @@ subtest('validate args', function () {
         is(ret.limit, 10);
     })();
     (function () {
-        try {
-        var ret = testFunc({ artist: 'Perfume' }); // XXX 死
-        } catch (e) {
-            console.trace(e);
-        }
+        var ret = testFunc({ artist: 'Perfume' });
         ok(ret);
         is(ret.artist, 'Perfume');
     })();
-    (function () {
-        dies_ok(
-            function () { testFunc({ foo: 'bar' }) },
-            /Argument .+ is required/
-        );
-    })();
-    (function () {
-        dies_ok(
-            function () { testFunc({ artist: [] }) },
-            /Validation failed/
-        );
-    })();
+    dies_ok(
+        function () { testFunc({ foo: 'bar' }) },
+        /Argument .+ is required/
+    );
+    dies_ok(
+        function () { testFunc({ foo: 'bar' }) },
+        /Usage/
+    );
+    dies_ok(
+        function () { testFunc({ artist: [] }) },
+        /Validation failed/
+    );
+    dies_ok(
+        function () { testFunc({ artist: [] }) },
+        /Usage/
+    );
+    dies_ok(
+        function () { testFunc() },
+        /Arguments must be a object/
+    );
+    dies_ok(
+        function () { testFunc() },
+        /Usage/
+    );
 })
 
 subtest('undefined type', function () {
@@ -83,10 +91,23 @@ subtest('undefined type', function () {
     );
 });
 
+subtest('alias', function () {
+    var testFunc = function () {
+        var args = DataValidator.validate({
+            limit: {isa: 'Int', alias: 'maxResults'}
+        }, arguments);
+        return args;
+    };
+    var ret = testFunc({limit: 10});
+    ok(ret);
+    is(ret.limit,      10);
+    is(ret.maxResults, 10);
+});
+
 // XXX
 // - enum
-// - alias
-
-done_testing();
+// - Array[Object]
+// - ClassName
+// - where -> function () {...}
 
 }).call(this);

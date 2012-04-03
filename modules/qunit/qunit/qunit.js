@@ -361,6 +361,10 @@ var QUnit = {
 		QUnit.push(expected !== actual, actual, expected, message);
 	},
 
+    like: function(actual, expected, message) {
+        QUnit.push(expected.test(actual), actual, expected.toString(), message);
+    },
+
 	raises: function(block, expected, message) {
 		var actual, ok = false;
 
@@ -391,7 +395,8 @@ var QUnit = {
 			}
 		}
 
-		QUnit.ok(ok, message);
+		//QUnit.ok(ok, message);
+        QUnit.push(ok, actual, expected.toString(), message);
 	},
 
 	start: function(count) {

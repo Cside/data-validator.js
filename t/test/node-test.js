@@ -5,10 +5,6 @@ var QUnit    = require('../../modules/qunit/qunit/qunit'),
     qunitTap = require('/Users/Cside/work/qunit-tap').qunitTap,
     util     = require('util');
 
-QUnit.like = function(actual, expected, message) {
-    QUnit.push(expected.test(actual), actual, expected.toString(), message);
-};
-
 qunitTap(QUnit, util.puts, {noPlan: true});
 
 QUnit.init();
